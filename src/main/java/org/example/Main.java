@@ -148,6 +148,14 @@ public class Main {
         //printSudokuBoard(sudokuBoard);
 
         model.getSolver().solve();
+        if (model.getSolver().solve()) {
+            return model.getSolver().getMeasures();
+        }
+        else if(model.getSolver().isStopCriterionMet()){
+            System.out.println("The solver could not find a solution nor prove that none exists in the given limits");
+        }else {
+            System.out.println("The solver has proved the problem has no solution");
+        }
         return model.getSolver().getMeasures();
 
     }
