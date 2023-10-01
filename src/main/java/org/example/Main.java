@@ -83,10 +83,10 @@ public class Main {
 
             System.out.println("SUDOKU, "+difficulty+" clues");
             System.out.println("\t - Resolution Time Mean: "+resolutionTimeStatsNano.getMean() +" ns");
-            System.out.println("\t - Resolution Time : "+resolutionTimeStats.getMean() +" s");
-            System.out.println("\t\t - Mean : "+resolutionTimeStats.getMean() +" s");
-            System.out.println("\t\t - Min : "+resolutionTimeStats.getMin() +" s");
-            System.out.println("\t\t - Max : "+resolutionTimeStats.getMax() +" s");
+            System.out.println("\t - Resolution Time : "+resolutionTimeStatsNano.getMean() / (10E9) +" s");
+            System.out.println("\t\t - Mean : "+resolutionTimeStatsNano.getMean() / (10E9) +" s");
+            System.out.println("\t\t - Min : "+resolutionTimeStatsNano.getMin() / (10E9) +" s");
+            System.out.println("\t\t - Max : "+resolutionTimeStatsNano.getMax() / (10E9) +" s");
             System.out.println("\t - Nodes : ");
             System.out.println("\t\t - Mean : "+nodeStats.getMean());
             System.out.println("\t\t - Min : "+nodeStats.getMin());
