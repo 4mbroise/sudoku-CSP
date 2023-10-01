@@ -6,7 +6,6 @@ import com.opencsv.exceptions.CsvValidationException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ public class Main {
     static int L = 9;
     public static void main(String[] args) throws CsvValidationException, IOException {
 
-        SudokuRepository repo = readSudoKuCsv("sudoku_cluewise.csv");
+        SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
 
         solve(repo.getRandomSudoku(17));
 
@@ -54,13 +53,34 @@ public class Main {
                 System.out.print(" ");
             }
             System.out.println();
+
         }
 
-        System.out.println(sudokuBoard[0][0]);
 
+        for(int i = 0; i<L; i++) {
+            if (i==3 || i==6){
+                System.out.println("------+-------+------");
+            }
+            for (int j = 0; j < L; j++) {
+                IntVar cell = sudokuBoard[i][j];
+
+                if(j==3 || j == 6) {
+                    System.out.print("| ");
+                }
+
+                if(cell.isInstantiated()) {
+                    System.out.print(cell.getValue());
+                } else {
+                    System.out.print(" ");
+                }
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+        //System.out.println(sudokuBoard[0][0]);
     }
 
-    public static SudokuRepository readSudoKuCsv(String file) throws IOException, CsvValidationException {
+    public static SudokuRepository readSudokuCsv(String file) throws IOException, CsvValidationException {
 
         SudokuRepository repo = new SudokuRepository();
 
