@@ -6,7 +6,6 @@ import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
-import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.io.FileReader;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class Main {
+public class Choco {
     static int L = 9;
     public static void main(String[] args) throws CsvValidationException, IOException {
 
