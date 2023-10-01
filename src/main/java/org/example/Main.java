@@ -145,9 +145,21 @@ public class Main {
             model.allDifferent(getVarsOfBlock(sudokuBoard, i)).post();
         }
 
-        //printSudokuBoard(sudokuBoard);
+        IntVar[] flatSudokuBoard = new IntVar[L * L];
+        int index = 0;
+        for (IntVar[] row : sudokuBoard) {
+            for (IntVar var : row) {
+                flatSudokuBoard[index++] = var;
+            }
+        }
 
-        model.getSolver().solve();
+        model.getSolver().setSearch(
+                Search.inputOrderLBSearch(flatSudokuBoard),
+                VariableFactory.mostConstrainedStatic(null, flatSudokuBoard, new IntDomainMin()),
+                new IntDomainMiddle(flatSudokuBoard),
+                new IntDomainMax(flatSudokuBoard)
+        );
+        //printSudokuBoard(sudokuBoard);
         if (model.getSolver().solve()) {
             return model.getSolver().getMeasures();
         }
@@ -155,6 +167,7 @@ public class Main {
             System.out.println("The solver could not find a solution nor prove that none exists in the given limits");
         }else {
             System.out.println("The solver has proved the problem has no solution");
+            System.out.println("\t\t" + sudokuAsString);
         }
         return model.getSolver().getMeasures();
 
