@@ -29,7 +29,7 @@ public class Main {
         sudokuDificultyToTest.add(40);
         sudokuDificultyToTest.add(80);
 
-        int numberOfProblemToTest = 500;
+        int numberOfProblemToTest = 60000;
 
         Map<Integer, List<MeasuresRecorder>> results = new HashMap();
 
@@ -82,13 +82,31 @@ public class Main {
             }
 
             System.out.println("SUDOKU, "+difficulty+" clues");
-            System.out.println("\t - Resolution Time : "+resolutionTimeStatsNano.getMean() +" ns");
+            System.out.println("\t - Resolution Time Mean: "+resolutionTimeStatsNano.getMean() +" ns");
             System.out.println("\t - Resolution Time : "+resolutionTimeStats.getMean() +" s");
-            System.out.println("\t - Nodes : "+nodeStats.getMean());
-            System.out.println("\t - Backtracks : "+backTrackStats.getMean());
-            System.out.println("\t - Backjumps : "+backJumpStats.getMean());
-            System.out.println("\t - Fails : "+failStats.getMean());
-            System.out.println("\t - Restarts : "+restartStats.getMean());
+            System.out.println("\t\t - Mean : "+resolutionTimeStats.getMean() +" s");
+            System.out.println("\t\t - Min : "+resolutionTimeStats.getMin() +" s");
+            System.out.println("\t\t - Max : "+resolutionTimeStats.getMax() +" s");
+            System.out.println("\t - Nodes : ");
+            System.out.println("\t\t - Mean : "+nodeStats.getMean());
+            System.out.println("\t\t - Min : "+nodeStats.getMin());
+            System.out.println("\t\t - Max : "+nodeStats.getMax());
+            System.out.println("\t - Backtracks : ");
+            System.out.println("\t\t - Mean : "+backTrackStats.getMean());
+            System.out.println("\t\t - Min : "+backTrackStats.getMin());
+            System.out.println("\t\t - Max : "+backTrackStats.getMax());
+            System.out.println("\t - Backjumps : ");
+            System.out.println("\t\t - Mean : " + backJumpStats.getMean());
+            System.out.println("\t\t - Min : " + backJumpStats.getMin());
+            System.out.println("\t\t - Max : " + backJumpStats.getMax());
+            System.out.println("\t - Fails : ");
+            System.out.println("\t\t - Mean : "+failStats.getMean());
+            System.out.println("\t\t - Min : "+failStats.getMin());
+            System.out.println("\t\t - Max : "+failStats.getMax());
+            System.out.println("\t - Restarts : ");
+            System.out.println("\t\t - Mean : "+restartStats.getMean());
+            System.out.println("\t\t - Min : "+restartStats.getMin());
+            System.out.println("\t\t - Max : "+restartStats.getMax());
 
             System.out.println();
             System.out.println("################################################################################");
