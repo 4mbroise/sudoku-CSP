@@ -24,7 +24,7 @@ public class SudokuRepository {
     }
 
     public List<String> getSudokus(int nbClues, int nbSudoku) {
-        return this.repository.get(nbClues);
+        return this.repository.get(nbClues).subList(0, nbSudoku);
     }
 
     public String getRandomSudoku(int clueNumber) {
