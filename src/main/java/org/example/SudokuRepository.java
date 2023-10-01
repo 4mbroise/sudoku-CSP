@@ -19,6 +19,14 @@ public class SudokuRepository {
         this.repository.get(clueNumber).add(sudoku);
     }
 
+    public List<String> getSudokus(int nbClues) {
+        return this.repository.get(nbClues);
+    }
+
+    public List<String> getSudokus(int nbClues, int nbSudoku) {
+        return this.repository.get(nbClues).subList(0, nbSudoku);
+    }
+
     public String getRandomSudoku(int clueNumber) {
 
         List<String> sudokuList = this.repository.get(clueNumber);
