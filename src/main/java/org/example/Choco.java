@@ -31,8 +31,8 @@ public class Choco {
 
         List<Integer> sudokuDificultyToTest = new ArrayList<>();
         sudokuDificultyToTest.add(17);
-        sudokuDificultyToTest.add(40);
-        sudokuDificultyToTest.add(80);
+        //sudokuDificultyToTest.add(40);
+        //sudokuDificultyToTest.add(80);
 
         int numberOfProblemToTest = 1000;
 
@@ -48,7 +48,7 @@ public class Choco {
             List<MeasuresRecorder> measures = new ArrayList<>();
 
             for (String sudokuAsString: sudokuAsStringList) {
-                measures.add(solve(sudokuAsString));
+                measures.add(solve(sudokuAsString, Integer.toString(counter)));
 
                 counter++;
 
@@ -83,6 +83,7 @@ public class Choco {
 
             for (MeasuresRecorder measure: measures) {
                 // In nanosecond
+                System.out.println(measure.getTimeCountInNanoSeconds());
                 resolutionTimeStatsNano.addValue( measure.getTimeCountInNanoSeconds());
                 resolutionTimeStats.addValue( measure.getTimeCount());
                 nodeStats.addValue( measure.getNodeCount() );
@@ -127,8 +128,8 @@ public class Choco {
     }
 
 
-    public static MeasuresRecorder solve(String sudokuAsString) {
-        Model model = new Model("Sudoku");
+    public static MeasuresRecorder solve(String sudokuAsString, String id) {
+        Model model = new Model(id);
 
         IntVar[][] sudokuBoard = new IntVar[L][L];
         for (int i = 0; i<L; i++) {
@@ -158,7 +159,9 @@ public class Choco {
 
         //printSudokuBoard(sudokuBoard);
 
+        model.getSolver().reset();
         model.getSolver().solve();
+
         return model.getSolver().getMeasures();
 
     }
