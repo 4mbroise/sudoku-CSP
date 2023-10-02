@@ -32,7 +32,7 @@ public class OrTool {
         sudokuDificultyToTest.add(40);
         sudokuDificultyToTest.add(80);
 
-        int numberOfProblemToTest = 60000;
+        int numberOfProblemToTest = 1000;
 
         System.out.println(solve(repo.getRandomSudoku(17)).responseStats());
 
@@ -112,9 +112,9 @@ public class OrTool {
             System.out.println("\t\t - Min : " + userTime.getMin());
             System.out.println("\t\t - Max : " + userTime.getMax());
             System.out.println("\t - Wall Time : ");
-            System.out.println("\t\t - Mean : " + userTime.getMean());
-            System.out.println("\t\t - Min : " + userTime.getMin());
-            System.out.println("\t\t - Max : " + userTime.getMax());
+            System.out.println("\t\t - Mean : " + wallTime.getMean());
+            System.out.println("\t\t - Min : " + wallTime.getMin());
+            System.out.println("\t\t - Max : " + wallTime.getMax());
             System.out.println("\t - Deterministic Time : ");
             System.out.println("\t\t - Mean : " + DeterministicTime.getMean());
             System.out.println("\t\t - Min : " + DeterministicTime.getMin());
@@ -169,7 +169,11 @@ public class OrTool {
 
         solver.getParameters().setEnumerateAllSolutions(false);
 
+        solver.getParameters().setNumSearchWorkers(1);
+        solver.getParameters().setCpModelPresolve(false);
+
         CpSolverStatus status = solver.solve(model);
+
 
         if(!(status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE)){
             System.out.println("\t NO SOLUTION FOUND");

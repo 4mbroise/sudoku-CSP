@@ -28,7 +28,7 @@ public class Choco {
         sudokuDificultyToTest.add(40);
         sudokuDificultyToTest.add(80);
 
-        int numberOfProblemToTest = 60000;
+        int numberOfProblemToTest = 1000;
 
         Map<Integer, List<MeasuresRecorder>> results = new HashMap();
 
@@ -43,7 +43,7 @@ public class Choco {
 
                 counter++;
 
-                //System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
+                System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
 
             }
             results.put(difficulty, measures);
