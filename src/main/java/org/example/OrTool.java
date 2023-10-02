@@ -24,8 +24,14 @@ public class OrTool {
     public static void main(String[] args) throws CsvValidationException, IOException {
 
         Loader.loadNativeLibraries();
+
+        System.out.println("Reading sudokus");
+
         SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
 
+        System.out.println();
+        System.out.println("#####################################################################################");
+        System.out.println();
 
         List<Integer> sudokuDificultyToTest = new ArrayList<>();
         sudokuDificultyToTest.add(17);
@@ -33,9 +39,8 @@ public class OrTool {
         sudokuDificultyToTest.add(80);
 
         int numberOfProblemToTest = 1000;
-
-        System.out.println(solve(repo.getRandomSudoku(17)).responseStats());
-
+        System.out.println("End reading sudokus, begining benchmark for "+sudokuDificultyToTest.size()+" difficulties ("+numberOfProblemToTest+" sudokus tested by difficulty)");
+        System.out.println();
 
         Map<Integer, List<CpSolver>> results = new HashMap();
 
@@ -51,7 +56,10 @@ public class OrTool {
 
                 counter++;
 
-                System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
+
+                if(counter % 500 == 0) {
+                    System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
+                }
 
             }
             results.put(difficulty, solvers);
@@ -65,6 +73,7 @@ public class OrTool {
 
     public static void computeAndPrintMeans(Map<Integer, List<CpSolver>> results) {
 
+        System.out.println();
         System.out.println("################################################################################");
         System.out.println();
 

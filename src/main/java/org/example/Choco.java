@@ -20,7 +20,13 @@ public class Choco {
     static int L = 9;
     public static void main(String[] args) throws CsvValidationException, IOException {
 
+        System.out.println("Reading sudokus");
+
         SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
+
+        System.out.println();
+        System.out.println("#####################################################################################");
+        System.out.println();
 
 
         List<Integer> sudokuDificultyToTest = new ArrayList<>();
@@ -29,6 +35,9 @@ public class Choco {
         sudokuDificultyToTest.add(80);
 
         int numberOfProblemToTest = 1000;
+
+        System.out.println("End reading sudokus, begining benchmark for "+sudokuDificultyToTest.size()+" difficulties ("+numberOfProblemToTest+" sudokus tested by difficulty)");
+        System.out.println();
 
         Map<Integer, List<MeasuresRecorder>> results = new HashMap();
 
@@ -43,7 +52,9 @@ public class Choco {
 
                 counter++;
 
-                System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
+                if(counter % 500 == 0) {
+                    System.out.println(counter+"/"+numberOfProblemToTest * sudokuDificultyToTest.size());
+                }
 
             }
             results.put(difficulty, measures);
@@ -55,6 +66,7 @@ public class Choco {
 
     public static void computeAndPrintMeans(Map<Integer, List<MeasuresRecorder>> results) {
 
+        System.out.println();
         System.out.println("################################################################################");
         System.out.println();
 
