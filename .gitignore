@@ -39,3 +39,5 @@ build/
 .DS_Store
 
 sudoku_cluewise.csv
+*.csv
+.idea/
