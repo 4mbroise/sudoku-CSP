@@ -6,7 +6,14 @@ import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.*;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.example.SudokuRepository;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -14,15 +21,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+
+import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
 
 
 public class Choco {
-    static int L = 9;
+    static int L = 16;
     public static void main(String[] args) throws CsvValidationException, IOException {
 
         System.out.println("Reading sudokus");
 
-        SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
+        //SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
+        SudokuRepository repo = readHexaSudokuCsv("hexaSudoku.csv");
+
+        repo.getRepository().keySet().forEach( (clues -> System.out.println(clues+" clues : "+(repo.getRepository().get(clues).size())+" sudokus")));
+
+        //System.exit(0);
+
 
         System.out.println();
         System.out.println("#####################################################################################");
@@ -30,11 +47,18 @@ public class Choco {
 
 
         List<Integer> sudokuDificultyToTest = new ArrayList<>();
-        sudokuDificultyToTest.add(17);
-        sudokuDificultyToTest.add(40);
-        sudokuDificultyToTest.add(80);
 
-        int numberOfProblemToTest = 60000;
+
+        // 9x9
+        //sudokuDificultyToTest.add(17);
+        //sudokuDificultyToTest.add(40);
+        //sudokuDificultyToTest.add(80);
+
+        // 16x16
+        sudokuDificultyToTest.add(86);
+
+
+        int numberOfProblemToTest = 1;
 
         System.out.println("End reading sudokus, begining benchmark for "+sudokuDificultyToTest.size()+" difficulties ("+numberOfProblemToTest+" sudokus tested by difficulty)");
         System.out.println();
@@ -44,10 +68,10 @@ public class Choco {
         int counter = 0;
 
         for (Integer difficulty: sudokuDificultyToTest) {
-            List<String> sudokuAsStringList = repo.getSudokus(difficulty, numberOfProblemToTest);
+            List<List<Integer>> sudokuAsStringList = repo.getSudokus(difficulty, numberOfProblemToTest);
             List<MeasuresRecorder> measures = new ArrayList<>();
 
-            for (String sudokuAsString: sudokuAsStringList) {
+            for (List<Integer> sudokuAsString: sudokuAsStringList) {
                 measures.add(solve(sudokuAsString, Integer.toString(counter)));
 
                 counter++;
@@ -127,22 +151,26 @@ public class Choco {
     }
 
 
-    public static MeasuresRecorder solve(String sudokuAsString, String id) {
+    public static MeasuresRecorder solve(List<Integer> sudokuAsIntegerList, String id) {
         Model model = new Model(id);
         model.getSolver().hardReset();
 
         IntVar[][] sudokuBoard = new IntVar[L][L];
+
+        IntVar[] flatIntVarArray = new IntVar[L*L];
+
         for (int i = 0; i<L; i++) {
             for(int j = 0; j<L; j++) {
-                int cellValue = Character.getNumericValue(sudokuAsString.charAt(i*9+j));
+                int cellValue = sudokuAsIntegerList.get(i*L+j);
                 // Unknown value => we create a variable
                 if(cellValue == 0){
-                    sudokuBoard[i][j] = model.intVar("X_"+i+"_"+j,1,9);
+                    sudokuBoard[i][j] = model.intVar("X_"+i+"_"+j,1,L);
                 }
                 // Knwon value => we create a constant
                 else {
                     sudokuBoard[i][j] = model.intVar("X_"+i+"_"+j, cellValue);
                 }
+                flatIntVarArray[i*L+j] = sudokuBoard[i][j];
             }
         }
 
@@ -159,8 +187,54 @@ public class Choco {
 
         //printSudokuBoard(sudokuBoard);
 
+        ToDoubleFunction<IntVar> convertIntVarToDouble = (intVar) -> intVar.getValue() + 5d;
+        ToIntFunction<IntVar> convertIntVarToInt = (intVar) -> intVar.getValue() + 5;
+
+        //Search.
+
+        //Search.intVarSearch(new ClausesBased(model, flatIntVarArray, convertIntVarToDouble, convertIntVarToInt),new IntDomainMin(),  flatIntVarArray)
+
+        // Random
+        IntStrategy Random_IntDomainMin = Search.intVarSearch(new Random<IntVar>(0), new IntDomainMin(), flatIntVarArray);
+        IntStrategy Random_IntDomainMax = Search.intVarSearch(new Random<IntVar>(0), new IntDomainMax(), flatIntVarArray);
+        IntStrategy Random_IntDomaiMiddle = Search.intVarSearch(new Random<IntVar>(0), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+        IntStrategy Random_IntDomaiMedian= Search.intVarSearch(new Random<IntVar>(0), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+
+        // First Fail
+        IntStrategy FirstFail_IntDomainMin = Search.intVarSearch(new FirstFail(model), new IntDomainMin(), flatIntVarArray);
+        IntStrategy FirstFail_IntDomainMax = Search.intVarSearch(new FirstFail(model), new IntDomainMax(), flatIntVarArray);
+        IntStrategy FirstFail_IntDomaiMiddle = Search.intVarSearch(new FirstFail(model), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+        IntStrategy FirstFail_IntDomaiMedian= Search.intVarSearch(new FirstFail(model), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+
+        // Occurence
+        IntStrategy Occurence_IntDomainMin = Search.intVarSearch(new Occurrence<IntVar>(), new IntDomainMin(), flatIntVarArray);
+        IntStrategy Occurence_IntDomainMax = Search.intVarSearch(new Occurrence<IntVar>(), new IntDomainMax(), flatIntVarArray);
+        IntStrategy Occurence_IntDomaiMiddle = Search.intVarSearch(new Occurrence<IntVar>(), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+        IntStrategy Occurence_IntDomaiMedian= Search.intVarSearch(new Occurrence<IntVar>(), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+
+        // DomOverWDeg
+        IntStrategy DomOverWDeg_IntDomainMin = Search.intVarSearch(new DomOverWDeg<IntVar>(flatIntVarArray,0), new IntDomainMin(), flatIntVarArray);
+        IntStrategy DomOverWDeg_IntDomainMax = Search.intVarSearch(new DomOverWDeg<IntVar>(flatIntVarArray,0), new IntDomainMax(), flatIntVarArray);
+        IntStrategy DomOverWDeg_IntDomaiMiddle = Search.intVarSearch(new DomOverWDeg<IntVar>(flatIntVarArray,0), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+        IntStrategy DomOverWDeg_IntDomaiMedian= Search.intVarSearch(new DomOverWDeg<IntVar>(flatIntVarArray,0), new IntDomainMiddle(IntDomainMiddle.FLOOR), flatIntVarArray);
+
+
+        model.getSolver().setSearch(
+                Occurence_IntDomainMin
+        );
+
+
         model.getSolver().solve();
         model.getSolver().getMeasures().stopStopwatch();
+
+
+        /*
+        for (IntVar[] intVars : sudokuBoard) {
+            for (IntVar intVar : intVars) {
+                System.out.println(intVar);
+            }
+        }
+         */
 
         return model.getSolver().getMeasures();
 
@@ -188,14 +262,17 @@ public class Choco {
     }
 
     public static IntVar[] getVarsOfBlock(IntVar[][] sudokuBoard ,int block) {
+
+        int squaredL = (int) Math.sqrt(L);
+
         IntVar[] varsOfBlock = new IntVar[L];
 
-        int startColumnIndex    = (block % 3) * 3;
-        int startRowIndex      = (block / 3) * 3;
+        int startColumnIndex    = (block % squaredL) * squaredL;
+        int startRowIndex      = (block / squaredL) * squaredL;
 
         int varCount = 0;
-        for (int j = startRowIndex; j < startRowIndex + 3; j++) {
-            for (int i = startColumnIndex; i < startColumnIndex + 3 ; i++) {
+        for (int j = startRowIndex; j < startRowIndex + squaredL; j++) {
+            for (int i = startColumnIndex; i < startColumnIndex + squaredL ; i++) {
                 varsOfBlock[varCount] = sudokuBoard[j][i];
                 varCount++;
             }
@@ -239,6 +316,27 @@ public class Choco {
             String sudoku = nextRecord[0];
             String nbClue = nextRecord[2] ;
 
+            repo.add(Integer.parseInt(nbClue), sudoku);
+
+            //System.out.println();
+        }
+
+        return repo;
+
+    }
+
+    public static SudokuRepository readHexaSudokuCsv(String file) throws IOException, CsvValidationException {
+
+        SudokuRepository repo = new SudokuRepository();
+
+        FileReader fileReader = new FileReader(file);
+        CSVReader csvReader = new CSVReaderBuilder(fileReader).withSkipLines(1).build();
+
+        String[] nextRecord;
+
+        while ((nextRecord = csvReader.readNext()) != null) {
+            String sudoku = nextRecord[0];
+            String nbClue = String.valueOf((16*16) - ((int) sudoku.codePoints().filter(ch -> ch == '0').count()));
             repo.add(Integer.parseInt(nbClue), sudoku);
 
             //System.out.println();

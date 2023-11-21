@@ -38,7 +38,7 @@ public class OrTool {
         sudokuDificultyToTest.add(40);
         sudokuDificultyToTest.add(80);
 
-        int numberOfProblemToTest = 1000;
+        int numberOfProblemToTest = 10000;
         System.out.println("End reading sudokus, begining benchmark for "+sudokuDificultyToTest.size()+" difficulties ("+numberOfProblemToTest+" sudokus tested by difficulty)");
         System.out.println();
 
@@ -48,10 +48,10 @@ public class OrTool {
 
 
         for (Integer difficulty: sudokuDificultyToTest) {
-            List<String> sudokuAsStringList = repo.getSudokus(difficulty, numberOfProblemToTest);
+            List<List<Integer>> sudokuAsStringList = repo.getSudokus(difficulty, numberOfProblemToTest);
             List<CpSolver> solvers = new ArrayList<>();
 
-            for (String sudokuAsString: sudokuAsStringList) {
+            for (List<Integer> sudokuAsString: sudokuAsStringList) {
                 solvers.add(solve(sudokuAsString));
 
                 counter++;
@@ -139,13 +139,13 @@ public class OrTool {
 
 
 
-    public static CpSolver solve(String sudokuAsString) {
+    public static CpSolver solve(List<Integer> sudokuAsIntegerList) {
         CpModel model = new CpModel();
 
         IntVar[][] sudokuBoard = new IntVar[L][L];
         for (int i = 0; i<L; i++) {
             for(int j = 0; j<L; j++) {
-                int cellValue = Character.getNumericValue(sudokuAsString.charAt(i*9+j));
+                int cellValue = sudokuAsIntegerList.get(i*9+j);
                 // Unknown value => we create a variable
                 if(cellValue == 0){
                     sudokuBoard[i][j] = model.newIntVar(1L,9L, "X_"+i+"_"+j);
@@ -186,12 +186,10 @@ public class OrTool {
 
         if(!(status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE)){
             System.out.println("\t NO SOLUTION FOUND");
-            System.out.println("\t\t "+sudokuAsString);
+            System.out.println("\t\t "+sudokuAsIntegerList);
         } else {
             //printSudokuBoardSolution(sudokuBoard, solver);
         }
-
-
 
         return solver;
 
@@ -235,6 +233,9 @@ public class OrTool {
     }
 
     public static void printSudokuBoardInit(IntVar[][] sudokuBoard){
+
+        int squaredL = (int) Math.sqrt(L);
+
         for(int i = 0; i<L; i++) {
             if (i==3 || i==6){
                 System.out.println("------+-------+------");
