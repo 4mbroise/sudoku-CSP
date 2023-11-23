@@ -99,7 +99,7 @@ class Sudoku:
     
     def isThereAMove(self):
         moves = self.getPossibleMoves()
-        if len(moves.keys) > 0:
+        if len(moves.keys()) > 0:
             return True
         return False
     
