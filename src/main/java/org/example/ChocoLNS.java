@@ -5,36 +5,41 @@ import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.lns.INeighborFactory;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.variables.*;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
+import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
-import org.example.SudokuRepository;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-
-
-public class Choco {
-    static int L = 9;
-
+public class ChocoLNS {
+    static int L = 16;
+    IntVar[] flatIntVarArray;
 
     public static void main(String[] args) throws CsvValidationException, IOException {
 
         System.out.println("Reading sudokus");
 
-        SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
-        //SudokuRepository repo = readHexaSudokuCsv("hexaSudoku.csv");
+        //SudokuRepository repo = readSudokuCsv("sudoku_cluewise.csv");
+        SudokuRepository repo = readHexaSudokuCsv("hexaSudoku.csv");
         //SudokuRepository repo = readHexaSudokuCsv("sudoku_n25.csv");
 
         repo.getRepository().keySet().forEach( (clues -> System.out.println(clues+" clues : "+(repo.getRepository().get(clues).size())+" sudokus")));
@@ -56,12 +61,12 @@ public class Choco {
         //sudokuDificultyToTest.add(80);
 
         // 16x16
-        sudokuDificultyToTest.add(17);
+        sudokuDificultyToTest.add(91);
 
         // 25x25
         //sudokuDificultyToTest.add(268);
 
-        int numberOfProblemToTest = 10000;
+        int numberOfProblemToTest = 110;
 
         System.out.println("End reading sudokus, begining benchmark for "+sudokuDificultyToTest.size()+" difficulties ("+numberOfProblemToTest+" sudokus tested by difficulty)");
         System.out.println();
@@ -177,7 +182,6 @@ public class Choco {
             }
         }
 
-        
         // Constraints
         for (int i = 0; i < L; i++) {
             // Row
@@ -230,6 +234,8 @@ public class Choco {
 
         //System.out.println("Solving");
 
+        //model.getSolver().setLNS(INeighborFactory.random(flatIntVarArray), new FailCounter(model.getSolver(), 100));
+
         model.getSolver().solve();
         model.getSolver().getMeasures().stopStopwatch();
         //System.out.println("TIME : "+ Calendar.getInstance().getTimeInMillis());
@@ -248,7 +254,7 @@ public class Choco {
     }
 
 
-    public static IntVar[] getVarsOfRow(IntVar[][] sudokuBoard, int row) {
+    public static IntVar[] getVarsOfRow(IntVar[][] sudokuBoard , int row) {
         IntVar[] varsOfRow = new IntVar[L];
 
         for (int i = 0; i < L; i++) {
@@ -258,7 +264,7 @@ public class Choco {
         return varsOfRow;
     }
 
-    public static IntVar[] getVarsOfColumn(IntVar[][] sudokuBoard, int column) {
+    public static IntVar[] getVarsOfColumn(IntVar[][] sudokuBoard ,int column) {
         IntVar[] varsOfColumn = new IntVar[L];
 
         for (int i = 0; i < L; i++) {
@@ -268,7 +274,7 @@ public class Choco {
         return varsOfColumn;
     }
 
-    public static IntVar[] getVarsOfBlock(IntVar[][] sudokuBoard, int block) {
+    public static IntVar[] getVarsOfBlock(IntVar[][] sudokuBoard ,int block) {
 
         int squaredL = (int) Math.sqrt(L);
 
@@ -287,7 +293,7 @@ public class Choco {
         return varsOfBlock;
     }
 
-    public void printSudokuBoard(IntVar[][] sudokuBoard){
+    public static void printSudokuBoard(IntVar[][] sudokuBoard){
         for(int i = 0; i<L; i++) {
             if (i==3 || i==6){
                 System.out.println("------+-------+------");
