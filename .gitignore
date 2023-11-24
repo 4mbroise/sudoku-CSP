@@ -41,3 +41,4 @@ build/
 sudoku_cluewise.csv
 *.csv
 .idea/
+**/__pycache__
