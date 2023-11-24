@@ -280,28 +280,28 @@ public class Choco {
         return varsOfBlock;
     }
 
-    public static void printSudokuBoard(IntVar[][] sudokuBoard){
-        for(int i = 0; i<L; i++) {
-            if (i==3 || i==6){
-                System.out.println("------+-------+------");
-            }
-            for (int j = 0; j < L; j++) {
-                IntVar cell = sudokuBoard[i][j];
-
-                if(j==3 || j == 6) {
-                    System.out.print("| ");
-                }
-
-                if(cell.isInstantiated()) {
-                    System.out.print(cell.getValue());
-                } else {
-                    System.out.print(" ");
-                }
-                System.out.print(" ");
-            }
-            System.out.println();
-        }
-    }
+//    public static void printSudokuBoard(IntVar[][] sudokuBoard){
+//        for(int i = 0; i<L; i++) {
+//            if (i==3 || i==6){
+//                System.out.println("------+-------+------");
+//            }
+//            for (int j = 0; j < L; j++) {
+//                IntVar cell = sudokuBoard[i][j];
+//
+//                if(j==3 || j == 6) {
+//                    System.out.print("| ");
+//                }
+//
+//                if(cell.isInstantiated()) {
+//                    System.out.print(cell.getValue());
+//                } else {
+//                    System.out.print(" ");
+//                }
+//                System.out.print(" ");
+//            }
+//            System.out.println();
+//        }
+//    }
 
     public static SudokuRepository readSudokuCsv(String file) throws IOException, CsvValidationException {
 
