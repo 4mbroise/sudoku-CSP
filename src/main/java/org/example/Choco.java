@@ -220,7 +220,7 @@ public class Choco {
 
 
         model.getSolver().setSearch(
-                Occurence_IntDomainMin
+                FirstFail_IntDomainMax
         );
 
 
